@@ -16,6 +16,12 @@
 //    |      |     |   |__________|                 |
 //    |------O-----O--------------------------------|
 //
+// 16May20  brr change flash rate by testing pins 2 and 3 at startup time:
+//                1 second  - Pins 2 and 3 (PB3 and PB4) grounded
+//                2 seconds - Pin 3 (PB4) grounded
+//                8 seconds - Pin 2 (PB3) grounded
+//                4 seconds - both pins open (default)
+//
 
 #include <avr/io.h>
 #include <util/delay.h>
@@ -37,16 +43,37 @@ ISR(WDT_vect) {
 }
 
 int main(void) {
+  uint8_t TCRbits;  // will hold Watchdog configuration flags
   cli();  //Interrupts off during initialization
   
 //Do a bunch of stuff to minimize power consumption:  
   PRR = (1<<PRTIM0) | (1<<PRADC); // Kill power to ADC and Timer0
   DIDR0 = 3;  //Shut off analog buffers
   ADCSRA = 0; // disable ADC
-  DDRB = 0;  //set LED pin as input so it doesn't consume power
-  PORTB = 0;  //shut off all pull-ups
+  DDRB = 0;  //set all pins as input (turns off output buffers)
+  PORTB = 0b00011000; // turn on pull-ups to read option pins
+  switch(PINB & 0b00011000) {
+    case 0b00000000:
+      // Pins 2 and 3 (PB3 and PB4) grounded
+      TCRbits = (1<<WDTIE) | (1<<WDCE) | (1<<WDP1) | (1<<WDP2); // 1 second flash rate
+      break;
+    case 0b00001000:
+      // Pin 3 (PB4) grounded
+      TCRbits = (1<<WDTIE) | (1<<WDCE) | (1<<WDP0) | (1<<WDP1) | (1<<WDP2); // 2 second flash rate
+      break;
+    case 0b00010000:
+      // Pin 2 (PB3) grounded
+      TCRbits = (1<<WDTIE) | (1<<WDCE) | (1<<WDP0) | (1<<WDP3); // 8 second flash rate
+      break;
+    case 0b00011000:
+      // Both pins open (default)
+    default:
+      TCRbits = (1<<WDTIE) | (1<<WDCE) | (1<<WDP3); //4 second flash rate
+      break;
+  }
+  PORTB = 0;  //shut off all pull-ups to save power
   
-  WDTCR = (1<<WDTIE) | (1<<WDCE) | (1<<WDP3); //4 second watchdog timeout
+  WDTCR = TCRbits;
   sei();  // Enable interrupts
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);  //setup for deep sleep mode
   
