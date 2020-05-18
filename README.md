@@ -10,3 +10,4 @@ It can also be built using the avr-gcc toolchain - see src folder.
 The PCB schematic and board layout are available in eagle format - see eagle folder.
 Finished PCBs are available from Oshpark at this link:  https://oshpark.com/shared_projects/rQWvfmNL
 
+![](./20200517_232101.jpg)
