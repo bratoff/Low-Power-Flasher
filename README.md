@@ -8,6 +8,6 @@ The source code can be built in the Arduino environment - see Arduino folder.
 It can also be built using the avr-gcc toolchain - see src folder.
 
 The PCB schematic and board layout are available in eagle format - see eagle folder.
-Finished PCBs are available from Oshpark at this link:  https://oshpark.com/shared_projects/rQWvfmNL
+Finished PCBs are available from Oshpark at this link:  [https://oshpark.com/shared_projects/rQWvfmNL](https://oshpark.com/shared_projects/Jv5amJjU)
 
 ![](./20200517_232101.jpg)
